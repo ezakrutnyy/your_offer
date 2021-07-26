@@ -19,8 +19,14 @@
 
         </ul>
 
-        <div class="navbar-text mr-3">${security.authUserName!}</div>
+
         <#if security.isAuthUser>
+            <div class="navbar-text mr-3">
+                <a class="profile" href="/user/profile">
+                    <img src="/static/img/profile.png"/>
+                    <span >${security.authUserName!}</span>
+                </a>
+            </div>
             <@login.logout />
         </#if>
         <#if !security.isAuthUser >
