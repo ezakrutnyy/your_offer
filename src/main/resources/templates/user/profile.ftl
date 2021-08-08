@@ -4,7 +4,12 @@
 <@c.page>
     <h5 class="text-primary">User of ${user.username}</h5>
     <hr/>
-
+    <div class="text-danger mb-3">
+        ${errorMessage!}
+    </div>
+    <div class="text-success mb-3">
+        ${successMessage!}
+    </div>
     <form action="/user/profile" method="post" xmlns="http://www.w3.org/1999/html">
 
         <div class="form-group row">

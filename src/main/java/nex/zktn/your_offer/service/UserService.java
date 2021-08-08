@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,16 +23,33 @@ public class UserService implements UserDetailsService {
 
     private final MailSenderService mailSenderService;
 
-    public UserService(UserRepository userRepository, MailSenderService mailSenderService) {
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, MailSenderService mailSenderService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.mailSenderService = mailSenderService;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public boolean createUser(User user) {
+        final User userDB = findByUsername(user.getUsername());
+        if (Objects.nonNull(userDB)) {
+            return false;
+        }
+        user.setActive(false);
+        user.setActivationCode(generateUID());
+        user.setRoles(Collections.singleton(Role.USER));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        userRepository.save(user);
+
+        if (StringUtils.isNotBlank(user.getEmail())) {
+            sendEmail(user);
+        }
+        return true;
     }
 
-    public void save(User user, String username, Boolean active, Map<String, String> form) {
+    public void updateUser(User user, String username, Boolean active, Map<String, String> form) {
         user.setUsername(username);
         user.setActive(active != null && active);
 
@@ -49,26 +67,13 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         return userRepository.findByUsername(s);
-    }
-
-    public boolean addUser(User user) {
-        final User userDB = findByUsername(user.getUsername());
-        if (Objects.nonNull(userDB)) {
-            return false;
-        }
-        user.setActive(false);
-        user.setActivationCode(generateUID());
-        user.setRoles(Collections.singleton(Role.USER));
-
-        userRepository.save(user);
-
-        if (StringUtils.isNotBlank(user.getEmail())) {
-            sendEmail(user);
-        }
-        return true;
     }
 
     public boolean isActivateUser(String activationCode) {
@@ -83,7 +88,7 @@ public class UserService implements UserDetailsService {
         return true;
     }
 
-    public void updateProfile(User user, String email, String password) {
+    public void updateUserProfile(User user, String email, String password) {
         final String currentEmail = user.getEmail();
 
         final boolean isChangeEmail = StringUtils.isNotBlank(currentEmail) && !currentEmail.equals(email);
@@ -97,7 +102,7 @@ public class UserService implements UserDetailsService {
         final boolean isChangePassword = StringUtils.isNotBlank(currentPassword) && !currentPassword.equals(password);
 
         if (isChangePassword) {
-            user.setPassword(password);
+            user.setPassword(passwordEncoder.encode(password));
         }
 
         if (isChangeEmail || isChangePassword) {

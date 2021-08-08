@@ -12,7 +12,8 @@
               crossorigin="anonymous">
 
         <link rel="stylesheet" href="static/style/style.css">
-              
+
+        <script src="https://www.google.com/recaptcha/api.js"></script>
     </head>
     <body>
 
@@ -30,6 +31,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"
             integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
             crossorigin="anonymous"></script>
+
     </body>
     </html>
 </#macro>

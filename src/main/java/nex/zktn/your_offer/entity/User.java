@@ -1,9 +1,14 @@
 package nex.zktn.your_offer.entity;
 
+import org.hibernate.validator.constraints.Length;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Validate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.util.Collection;
 import java.util.Set;
 
@@ -15,12 +20,20 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @NotBlank(message = "Field may not be blank")
+    @Length(max = 30, message = "Message too long (more than 30)")
     private String username;
 
+    @NotBlank(message = "Field may not be blank")
     private String password;
+
+    @Transient
+    private String passwordConfirm;
 
     private boolean active;
 
+    @NotBlank(message = "Field may not be blank")
+    @Email(message = "Field is not valid")
     private String email;
 
     private String activationCode;
@@ -114,5 +127,13 @@ public class User implements UserDetails {
 
     public void setActivationCode(String activationCode) {
         this.activationCode = activationCode;
+    }
+
+    public String getPasswordConfirm() {
+        return passwordConfirm;
+    }
+
+    public void setPasswordConfirm(String passwordConfirm) {
+        this.passwordConfirm = passwordConfirm;
     }
 }
